@@ -1,109 +1,86 @@
 const chai = require('chai');
-const { suite } = require('mocha');
 let assert = chai.assert;
 const ConvertHandler = require('../controllers/convertHandler.js');
 
 let convertHandler = new ConvertHandler();
 
-suite('Unit Tests', function(){
-  suite('convertHandler.getNum', function() {
-    test('correctly read a whole number input', function() {
-      assert.equal(convertHandler.getNum('3km'), 3)
-      assert.equal(convertHandler.getNum('3.L'), 3)
-      assert.equal(convertHandler.getNum('3..L'), 'invalid number')
-      assert.equal(convertHandler.getNum('3./L'), 'invalid number')
-      assert.equal(convertHandler.getNum('3'), 3)
-    })
-    test('correctly read a decimal number input', function() {
-      assert.equal(convertHandler.getNum('3.1km'), 3.1)
-      assert.equal(convertHandler.getNum('.21L'), 0.21)
-      assert.equal(convertHandler.getNum('.21'), 0.21)
-    })
-    test('correctly read a fractional input', function() {
-      assert.equal(convertHandler.getNum('1/2km'), 1 / 2)
-      assert.equal(convertHandler.getNum('1/2'), 1 / 2)
-    })
-    test('correctly read a fractional input with a decimal', function() {
-      assert.equal(convertHandler.getNum('3.1/2.5km'), 3.1 / 2.5)
-      assert.equal(convertHandler.getNum('3.1/2.5'), 3.1 / 2.5)
-      assert.equal(convertHandler.getNum('3/2.5km'), 3 / 2.5)
-      assert.equal(convertHandler.getNum('3/2.5'), 3 / 2.5)
-      assert.equal(convertHandler.getNum('3.1/2km'), 3.1 / 2)
-      assert.equal(convertHandler.getNum('3.1/2'), 3.1 / 2)
-    })
-    test('correctly return an error on a double-fraction', function() {
-      assert.equal(convertHandler.getNum('3/2/5lbs'), 'invalid number')
-      assert.equal(convertHandler.getNum('3/2/5'), 'invalid number')
-    })
-    test('correctly default to 1 when no numerical input is provided', function() {
-      assert.equal(convertHandler.getNum('km'), 1)
-      assert.equal(convertHandler.getNum(''), 1)
-    })
-  })
-
-  suite('convertHandler.getUnit', function() {
-    test('correctly read each valid input unit', function() {
-      assert.equal(convertHandler.getUnit('3km'), 'km')
-      assert.equal(convertHandler.getUnit('mi'), 'mi')
-      assert.equal(convertHandler.getUnit('5GaL'), 'gal')
-      assert.equal(convertHandler.getUnit('l'), 'L')
-      assert.equal(convertHandler.getUnit('1/2kg'), 'kg')
-      assert.equal(convertHandler.getUnit('2.5lbs'), 'lbs')
-    })
-    test('correctly return an error for an invalid input unit', function() {
-      assert.equal(convertHandler.getUnit('mil'), 'invalid unit')
-      assert.equal(convertHandler.getUnit('k'), 'invalid unit')
-      assert.equal(convertHandler.getUnit('5'), 'invalid unit')
-      assert.equal(convertHandler.getUnit(''), 'invalid unit')
-    })
-  })
-
-  suite('converHandler.getReturnUnit', function() {
-    test('return the correct return unit for each valid input unit', function() {
-      assert.equal(convertHandler.getReturnUnit('mi'), 'km')
-      assert.equal(convertHandler.getReturnUnit('km'), 'mi')
-      assert.equal(convertHandler.getReturnUnit('gal'), 'L')
-      assert.equal(convertHandler.getReturnUnit('L'), 'gal')
-      assert.equal(convertHandler.getReturnUnit('lbs'), 'kg')
-      assert.equal(convertHandler.getReturnUnit('kg'), 'lbs')
-    })
-  })
-
-  suite('convertHandler.spellOutUnit', function() {
-    test('correctly return the spelled-out string unit for each valid input unit', function() {
-      assert.equal(convertHandler.spellOutUnit('mi'), 'miles')
-      assert.equal(convertHandler.spellOutUnit('km'), 'kilometers')
-      assert.equal(convertHandler.spellOutUnit('gal'), 'gallons')
-      assert.equal(convertHandler.spellOutUnit('L'), 'liters')
-      assert.equal(convertHandler.spellOutUnit('lbs'), 'pounds')
-      assert.equal(convertHandler.spellOutUnit('kg'), 'kilograms')
-    })
-  })
-
-  suite('convertHandler.convert', function() {
-    test('correctly converts from gal to L', function() {
-      assert.equal(convertHandler.convert(1, 'gal'), 3.78541)
-      assert.equal(convertHandler.convert(3.78541, 'gal'), 14.32933)
-    })
-    test('correctly converts from L to gal', function() {
-      assert.equal(convertHandler.convert(1, 'L'), 0.26417)
-      assert.equal(convertHandler.convert(0.26417, 'L'), 0.06979)
-    })
-    test('correctly converts from mi to km', function() {
-      assert.equal(convertHandler.convert(1, 'mi'), 1.60934)
-      assert.equal(convertHandler.convert(1.60934, 'mi'), 2.58998)
-    })
-    test('correctly converts from km to mi', function() {
-      assert.equal(convertHandler.convert(1, 'km'), 0.62137)
-      assert.equal(convertHandler.convert(0.62137, 'km'), 0.38610)
-    })
-    test('correctly converts from lbs to kg', function() {
-      assert.equal(convertHandler.convert(1, 'lbs'), 0.45359)
-      assert.equal(convertHandler.convert(0.45359, 'lbs'), 0.20574)
-    })
-    test('correctly converts from kg to lbs', function() {
-      assert.equal(convertHandler.convert(1, 'kg'), 2.20462)
-      assert.equal(convertHandler.convert(2.20462, 'kg'), 4.86036)
-    })
-  })
+suite('Unit Tests', function() {
+    suite("Number Input Tests", function() {
+        test("#wholeNumberInput", function() {
+            assert.strictEqual(convertHandler.getNum("4gal"), 4);
+            assert.strictEqual(convertHandler.getNum("123Kg"), 123);
+        });
+        test("#decimalNumberInput", function() {
+            assert.strictEqual(convertHandler.getNum("4.5L"), 4.5);
+            assert.strictEqual(convertHandler.getNum("0.1201lbs"), 0.1201);
+        });
+        test("#fractionInput", function() {
+            assert.strictEqual(convertHandler.getNum("1/2mI"), 0.5);
+            assert.strictEqual(convertHandler.getNum("2/3KM"), 2 / 3);
+        });
+        test("#decimalFractionInput", function() {
+            assert.strictEqual(convertHandler.getNum("1.5/2gal"), 0.75);
+            assert.strictEqual(convertHandler.getNum("2.5/1.25kg"), 2);
+        });
+        test("#incorrectFractionInput", function() {
+            assert.throws(() => convertHandler.getNum("3/2/3L"), /invalid number/);
+            assert.throws(() => convertHandler.getNum("0.1/0.2/0.3/0.4lbs"), /invalid number/);
+        });
+        test("#noNumericalInput", function() {
+            assert.strictEqual(convertHandler.getNum("mi"), 1);
+            assert.strictEqual(convertHandler.getNum("km"), 1);
+        });
+    });
+    suite("Unit Input Tests", function() {
+        test("#correctUnitInput", function() {
+            assert.strictEqual(convertHandler.getUnit("1.2/3gal"), "gal");
+            assert.strictEqual(convertHandler.getUnit("1.2/3l"), "L");
+            assert.strictEqual(convertHandler.getUnit("1.2/3Mi"), "mi");
+            assert.strictEqual(convertHandler.getUnit("1.2/3kM"), "km");
+            assert.strictEqual(convertHandler.getUnit("1.2/3LbS"), "lbs");
+            assert.strictEqual(convertHandler.getUnit("1.2/3KG"), "kg");
+        });
+        test("#incorrectUnitInput", function() {
+            assert.throws(() => convertHandler.getUnit("1.2/3gall"), /invalid unit/);
+            assert.throws(() => convertHandler.getUnit("1.2/3lL"), /invalid unit/);
+            assert.throws(() => convertHandler.getUnit("1.2/3MimI"), /invalid unit/);
+            assert.throws(() => convertHandler.getUnit("1.2/3"), /invalid unit/);
+            assert.throws(() => convertHandler.getUnit("1.2/3Slbs"), /invalid unit/);
+            assert.throws(() => convertHandler.getUnit("1.2/3kggkKgkg"), /invalid unit/);
+        });
+        test("#returnUnit", function() {
+            assert.strictEqual(convertHandler.getReturnUnit("gal"), "L");
+            assert.strictEqual(convertHandler.getReturnUnit("L"), "gal");
+            assert.strictEqual(convertHandler.getReturnUnit("mi"), "km");
+            assert.strictEqual(convertHandler.getReturnUnit("km"), "mi");
+            assert.strictEqual(convertHandler.getReturnUnit("lbs"), "kg");
+            assert.strictEqual(convertHandler.getReturnUnit("kg"), "lbs");
+        });
+        test("#spelledOutUnit", function() {
+            assert.strictEqual(convertHandler.spellOutUnit("gal"), "gallons");
+            assert.strictEqual(convertHandler.spellOutUnit("L"), "liters");
+            assert.strictEqual(convertHandler.spellOutUnit("mi"), "miles");
+            assert.strictEqual(convertHandler.spellOutUnit("km"), "kilometers");
+            assert.strictEqual(convertHandler.spellOutUnit("lbs"), "pounds");
+            assert.strictEqual(convertHandler.spellOutUnit("kg"), "kilograms");
+        });
+        test("#convert/galToL", function() {
+            assert.strictEqual(convertHandler.convert(4, "gal"), 15.14164);
+        });
+        test("#convert/LToGal", function() {
+            assert.strictEqual(convertHandler.convert(15.14164, "L"), 4);
+        });
+        test("#convert/miToKm", function() {
+            assert.strictEqual(convertHandler.convert(3.1, "mi"), 4.98895);
+        });
+        test("#convert/kmToMi", function() {
+            assert.strictEqual(convertHandler.convert(4.98895, "km"), 3.1);
+        });
+        test("#convert/lbsToKg", function() {
+            assert.strictEqual(convertHandler.convert(2.5, "lbs"), 1.13398);
+        });
+        test("#convert/kgToLbs", function() {
+            assert.strictEqual(convertHandler.convert(1.13398, "kg"), 2.5);
+        });
+    });
 });
