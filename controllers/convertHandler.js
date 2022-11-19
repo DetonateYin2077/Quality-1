@@ -1,78 +1,58 @@
-const LBS_TO_KG = 0.453592;
-const MI_TO_KM = 1.60934;
-const GAL_TO_L = 3.78541;
+class ConvertHandler {
 
-const UNITS = {
-  kg: ["lbs", "pounds", num => num / LBS_TO_KG], lbs: ["kg", "kilograms", num => num * LBS_TO_KG],
-  km: ["mi", "miles", num => num / MI_TO_KM], mi: ["km", "kilometers", num => num * MI_TO_KM],
-  l: ["gal", "gallons", num => num / GAL_TO_L], gal: ["l", "liters", num => num * GAL_TO_L]
-};
-
-const ALPHA_REGEX = /[a-z]+/gi;
-
-function ConvertHandler() {
-  
-  this.getNum = function(input) {
-    let result = input.split(ALPHA_REGEX)[0];
-
-    if (result === "") {
-      return 1;
+  getNum(input) {
+    if(!input || !input.match(/\d/)) return 1;
+    if(input.includes('/')) {
+      const splittedFraction = input.split('/');
+      if(splittedFraction.length !== 2) return null;
+      return parseFloat(splittedFraction[0]) / parseFloat(splittedFraction[1]);
     }
-
-    const potentialNum = +result;
-
-    if (isNaN(potentialNum)) {
-      result = result.split("/");
-
-      if (result.length === 2) {
-        let dividend = +result[0], divisor = +result[1];
-
-        if (isNaN(dividend) || isNaN(divisor) || dividend <= 0 || divisor  <= 0) {
-          throw new Error("invalid number");
-        } else {
-          return dividend / divisor;
-        }
-      } else {
-        throw new Error("invalid number");
-      }
-    } else if (potentialNum <= 0) {
-      throw new Error("invalid number");
-    } else {
-      return potentialNum;
-    }
+    return parseFloat(input);
   };
   
-  this.getUnit = function(input) {
-    let result = input.match(ALPHA_REGEX);
-
-    if (result === null) {
-      throw new Error("invalid unit");
-    }
-
-    result = result[0].toLowerCase();
-    if (typeof UNITS[result] === "undefined") {
-      throw new Error("invalid unit");
-    }
-
-    return result === "l" ? "L" : result;
+  getUnit(input) {
+    const validUnits = ['gal', 'L', 'mi', 'km', 'lbs', 'kg'];
+    const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const result = input.toLowerCase().split('').reduce((result, character) => letters.includes(character) ? result + character : result, '');
+    if(result === 'l') return 'L';
+    return validUnits.includes(result) ? result : null;
   };
   
-  this.getReturnUnit = function(initUnit) {
-    const result = UNITS[initUnit.toLowerCase()][0];
-
-    return result === "l" ? "L" : result;
+  getReturnUnit(initUnit) {
+    if(initUnit === 'gal') return 'L';
+    if(initUnit === 'L') return 'gal';
+    if(initUnit === 'mi') return 'km';
+    if(initUnit === 'km') return 'mi';
+    if(initUnit === 'lbs') return 'kg';
+    if(initUnit === 'kg') return 'lbs';
+    return null;
   };
 
-  this.spellOutUnit = function(unit) {
-    return UNITS[this.getReturnUnit(unit).toLowerCase()][1];
+  spellOutUnit(unit) {
+    if(unit === 'gal') return 'gallons';
+    if(unit === 'L') return 'liters';
+    if(unit === 'mi') return 'miles';
+    if(unit === 'km') return 'kilometers';
+    if(unit === 'lbs') return 'pounds';
+    if(unit === 'kg') return 'kilograms';
+    return null;
   };
   
-  this.convert = function(initNum, initUnit) {
-    return parseFloat(UNITS[initUnit.toLowerCase()][2](initNum).toFixed(5));
+  convert(initNum, initUnit) {
+    const galToL = 3.78541;
+    const lbsToKg = 0.453592;
+    const miToKm = 1.60934;
+    if(initUnit === 'gal') return (initNum * galToL);
+    if(initUnit === 'L') return (initNum / galToL);
+    if(initUnit === 'mi') return (initNum * miToKm);
+    if(initUnit === 'km') return (initNum / miToKm);
+    if(initUnit === 'lbs') return (initNum * lbsToKg);
+    if(initUnit === 'kg') return (initNum / lbsToKg);
+    return null;
   };
   
-  this.getString = function(initNum, initUnit, returnNum, returnUnit) {
-    return `${initNum} ${this.spellOutUnit(initUnit)} converts to ${returnNum.toFixed(5)} ${this.spellOutUnit(returnUnit)}`;
+  getString(initNum, initUnit, returnNum, returnUnit) {
+    return `${initNum} ${initUnit} converts to ${returnNum} ${returnUnit}`;
   };
   
 }
